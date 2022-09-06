@@ -20,19 +20,47 @@
     
 }
 .digit-block{
+    
     display:flex;
     flex-direction: row;
-    
     /*gap:5rem;*/
+}
+.operator-block{
+    width:5rem;
+    display:flex;
+    flex-direction: column;
+    
+
+}
+.position-block{
+    display:inline-block;
+    position:relative;
+    top:-25.85rem;
+    left:24.3rem;
 }
 .digit-block div{
     flex-grow: 0.1;
     border: 1px solid lightgrey;
-    background-color: aqua;
+    
     
 }
+.operator-block div{
+    flex:0.5 1 2rem;
+    border: 1px solid black;
 
-.digit-block p{
+}
+.digit-block div{
+    background-color: aqua;
+
+}
+.operator-block div{
+    background-color:rgb(200, 97, 7); 
+}
+
+.digit-block p,.operator-block p{
     font-size: 2rem;
     text-align: center;
 }
+
+
+
