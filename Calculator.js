@@ -5,45 +5,79 @@ const clearHandler = ()=>{
     let symbolNode = document.querySelector('h3');
     symbolNode.textContent='';
 }
+/*error cases: +-,(+-* div at start)*/ 
 const DisplayDigitHandler=(digitNode)=>{
     let symbolNode = document.querySelector('h3');
-    symbolNode.textContent+=digitNode.textContent.trim();
+    if(symbolNode.textContent!='Err'){
+        symbolNode.textContent+=digitNode.textContent.trim();
+    }
+    
 }
 const DisplayOpHandler=(operatorNode)=>{
     let symbolNode = document.querySelector('h3');
     let symbolContent = symbolNode.textContent;
+    let symbolArr=symbolContent.split('');
+    let opAtStart = symbolContent.length===0 && operatorNode.textContent.trim()!='-';
+    let opAtEnd = symbolArr[symbolArr.length-1]=='+'||symbolArr[symbolArr.length-1]=='-'||symbolArr[symbolArr.length-1]=='*'||symbolArr[symbolArr.length-1]=='/';
+    //let opAtEnd = symbolContent.split('')
  
-    
-    if(symbolContent.length==0 && operatorNode.textContent.trim()=='-'){/*Check if first symbol is - for negative number*/ 
+    if(symbolContent!='Err'&&(!opAtStart)&&(!opAtEnd)){//Error after equals button
+        if(symbolContent.length==0 && operatorNode.textContent.trim()=='-'){/*Check if first symbol is - for negative number*/ 
         symbolNode.textContent+=operatorNode.textContent.trim();/**to appear to DOM!! */
         
-    }
-    else{
-        /*Checks current h3 string when an op is pressed */
-        /* If another op already exists , means we have already an equation */
-        /* Calc the result of the eq above and put to DOM the result with the current operator that was pressed  */
-        if(symbolContent.includes('+')||symbolContent.includes('-',1)||symbolContent.includes('*')||symbolContent.includes('/')){
-            let calcArr = generateSymbolArr(symbolContent.split(''));/* ['1','2','+','2','5'] -> [12,'+',25]*/
-            let subResult = calculations(calcArr);/*calculations result(number)*/
-            symbolNode.textContent=subResult+operatorNode.textContent.trim();/**to appear to DOM!! */
         }
         else{
+            /*Checks current h3 string when an op is pressed */
+            /* If another op already exists , means we have already an equation */
+            /* Calc the result of the eq above and put to DOM the result with the current operator that was pressed  */
+            if(symbolContent.includes('+')||symbolContent.includes('-',1)||symbolContent.includes('*')||symbolContent.includes('/')){
+                let calcArr = generateSymbolArr(symbolArr);/* ['1','2','+','2','5'] -> [12,'+',25]*/
+                let subResult = calculations(calcArr);/*calculations result(number)*/
+
+                if(subResult!='Err'){/*Error after op button */
+                    symbolNode.textContent=subResult+operatorNode.textContent.trim();/**to appear to DOM!! */
+
+                }
+                else{
+                    symbolNode.textContent=subResult;
+
+                }
+                
+            }
+            else{
             
-            symbolNode.textContent+=operatorNode.textContent.trim();/**to appear to DOM!! */
+                symbolNode.textContent+=operatorNode.textContent.trim();/**to appear to DOM!! */
             
+            }
         }
+
     }
+    
     
 }
 const resultHandler = ()=>{
     
-    let strNum = '';
-    let symbolNode = document.querySelector('h3');
-    let symbols = symbolNode.textContent.split('');/*'12+25'->['1','2','+','2','5']*/ 
     
-    let calcArray=generateSymbolArr(symbols);/* ['1','2','+','2','5'] -> [12,'+',25]*/ 
-    let calcResult = calculations(calcArray);/*calculations result(number)*/ 
-    symbolNode.textContent=calcResult;
+    let symbolNode = document.querySelector('h3');
+
+    if(symbolNode.textContent!='Err'){
+        let symbols = symbolNode.textContent.split('');/*'12+25'->['1','2','+','2','5']*/ 
+        let opNotAtEnd=symbols[symbols.length-1]!='+'&&symbols[symbols.length-1]!='-'&&symbols[symbols.length-1]!='*'&&symbols[symbols.length-1]!='/';
+        let opIsIncl = (symbols.includes('+'))&&(symbols.includes('-',1))&&(symbols.includes('*'))&&(symbols.includes('/'));
+    
+        if(opNotAtEnd&&opIsIncl){//if op exists and is not at end of arr,means we have full equation
+            let calcArray=generateSymbolArr(symbols);/* ['1','2','+','2','5'] -> [12,'+',25]*/ 
+            let calcResult = calculations(calcArray);/*calculations result(number)*/ 
+            symbolNode.textContent=calcResult;
+        }
+        else{
+            symbolNode.textContent='Err';
+
+        }
+
+    }
+    
+    
    
 }
 /* MAIN */
@@ -68,7 +102,18 @@ operators.forEach((operator)=>{
 function add(num1,num2){return num1+num2;}
 function subtract(num1,num2){return num1-num2;}
 function multiply(num1,num2){return num1*num2;}
-function divide(num1,num2){return num1/num2;}
+function divide(num1,num2){
+    res=num1/num2;
+    
+    if(num1!=0){
+        if(num1%num2==0){/*if decimal */
+        return res;
+        }
+        return (res).toPrecision(3);
+
+    }
+    return 'Err';
+    }
 function operate(num1,num2,op){
     let opCondition = OPERATORS[op];
     let answer;
