@@ -5,6 +5,16 @@ const clearHandler = ()=>{
     let symbolNode = document.querySelector('h3');
     symbolNode.textContent='';
 }
+const backspaceHandler = ()=>{
+    let symbolNode = document.querySelector('h3');
+    let symbolContent=symbolNode.textContent;
+    let symbolArr = symbolContent.split('');
+    let symbolStr;
+    symbolArr.pop();
+    symbolStr=symbolArr.join('');
+    symbolNode.textContent=symbolStr;
+
+}
 /*error cases: +-,(+-* div at start)*/ 
 const DisplayDigitHandler=(digitNode)=>{
     let symbolNode = document.querySelector('h3');
@@ -63,8 +73,7 @@ const resultHandler = ()=>{
     if(symbolNode.textContent!='Err'){
         let symbols = symbolNode.textContent.split('');/*'12+25'->['1','2','+','2','5']*/ 
         let opNotAtEnd=symbols[symbols.length-1]!='+'&&symbols[symbols.length-1]!='-'&&symbols[symbols.length-1]!='*'&&symbols[symbols.length-1]!='/';
-        let opIsIncl = (symbols.includes('+'))&&(symbols.includes('-',1))&&(symbols.includes('*'))&&(symbols.includes('/'));
-    
+        let opIsIncl = (symbols.includes('+'))||(symbols.includes('-',1))||(symbols.includes('*'))||(symbols.includes('/'));
         if(opNotAtEnd&&opIsIncl){//if op exists and is not at end of arr,means we have full equation
             let calcArray=generateSymbolArr(symbols);/* ['1','2','+','2','5'] -> [12,'+',25]*/ 
             let calcResult = calculations(calcArray);/*calculations result(number)*/ 
@@ -84,10 +93,12 @@ const resultHandler = ()=>{
 let digits=document.querySelectorAll('.digit');
 let operators=document.querySelectorAll('.operator');
 let equals = document.querySelector('.equals');
+let backspace = document.querySelector('.backspace-block');
 let clear = document.querySelector('.clear');
 
 clear.addEventListener('click',clearHandler);
 equals.addEventListener('click',resultHandler);
+backspace.addEventListener('click',backspaceHandler);
 
 digits.forEach((digit)=>{
     
