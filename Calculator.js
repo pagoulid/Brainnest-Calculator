@@ -15,6 +15,64 @@ const backspaceHandler = ()=>{
     symbolNode.textContent=symbolStr;
 
 }
+const floatingHandler = (floatingPointContent)=>{
+    let symbolNode = document.querySelector('h3');
+    let symbolContent=symbolNode.textContent;
+    if(symbolContent.length!=0&&symbolContent!='Err'){
+        const symbolOpSeparator =(symbolString)=>{/*splits string according to included operator(except '-' at start if given(negative))*/ 
+            let opKeys = Object.keys(OPERATORS);
+            let splitStr =[];/** Init */
+            let opCondition;
+            let opIsIncl = false;
+            for(op of opKeys){
+                opCondition = op=='-'?1:0;
+
+                switch(opCondition){
+                    case 0:
+                        if(symbolString.includes(op)){
+                            opIsIncl=true;
+                            splitStr=symbolString.split(op);  
+                        }
+                        break;
+                    case 1:
+                        if(symbolString.includes(op,1)){
+                            opIsIncl=true;
+                            splitStr=symbolString.split(op);  
+                        }
+                        break;
+                    
+                }
+
+                /* if split is done break from loop */
+                if(opIsIncl){
+                    break;
+                }
+                
+            }
+            return splitStr;
+        }
+        let symbolArr = symbolOpSeparator(symbolContent);
+        console.log(`split for floating handler ${symbolArr}`);
+        if(symbolArr.length==0){/* operator is not included */
+            symbolNode.textContent+=floatingPointContent.trim();
+        }
+        else{
+           
+            let lastSymbol =symbolArr[symbolArr.length-1];
+            let isNotOp = lastSymbol!='+' && lastSymbol!='-' && lastSymbol!='*' && lastSymbol!='/';
+            if(isNotOp && !(lastSymbol.includes('.'))&& lastSymbol!=''){/*if last condition is true means we have an op at end */
+ 
+                 symbolNode.textContent+=floatingPointContent.trim();
+            }
+
+           
+            
+        }
+        
+    }
+
+
+}
 /*error cases: +-,(+-* div at start)*/ 
 const DisplayDigitHandler=(digitNode)=>{
     let symbolNode = document.querySelector('h3');
@@ -95,10 +153,12 @@ let operators=document.querySelectorAll('.operator');
 let equals = document.querySelector('.equals');
 let backspace = document.querySelector('.backspace-block');
 let clear = document.querySelector('.clear');
+let floatingPoint = document.querySelector('.floating-point');
 
 clear.addEventListener('click',clearHandler);
 equals.addEventListener('click',resultHandler);
 backspace.addEventListener('click',backspaceHandler);
+floatingPoint.addEventListener('click',()=>{floatingHandler(floatingPoint.textContent)});
 
 digits.forEach((digit)=>{
     
@@ -152,7 +212,7 @@ function generateSymbolArr(array){
     for(let i=0;i<array.length;i++){
 
         if(array[i]=='+'||(array[i]=='-'&&(i!=0))||array[i]=='*'||array[i]=='/'){
-            newArr.push(parseInt(strNum));
+            newArr.push(parseFloat(strNum));
             strNum='';
             newArr.push(array[i]);
         }
@@ -161,7 +221,7 @@ function generateSymbolArr(array){
                
         } 
     }
-    newArr.push(parseInt(strNum));
+    newArr.push(parseFloat(strNum));
     console.log(`str:${newArr}`); 
     return newArr;
 
