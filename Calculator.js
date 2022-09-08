@@ -1,5 +1,6 @@
 
 const OPERATORS = {'+':0,'-':1,'*':2,'/':3};
+const MAX_DIGITS = 5;
 
 const clearHandler = ()=>{
     let symbolNode = document.querySelector('h3');
@@ -76,8 +77,36 @@ const floatingHandler = (floatingPointContent)=>{
 /*error cases: +-,(+-* div at start)*/ 
 const DisplayDigitHandler=(digitNode)=>{
     let symbolNode = document.querySelector('h3');
-    if(symbolNode.textContent!='Err'){
-        symbolNode.textContent+=digitNode.textContent.trim();
+    let symbolContent = symbolNode.textContent;
+    if(symbolContent!='Err'){
+        if(symbolContent.length!=0){
+            let symbolStr = symbolContent+digitNode.textContent.trim();
+            let symbolArr = generateSymbolArr(symbolStr);
+            
+            let symbolLast = symbolArr[symbolArr.length-1].toString();/* convert to string to check length for big number */
+            let AbsSymbolLast = symbolLast;
+            if(AbsSymbolLast.charAt(0)=='-'){// to validate properly in case of negative number
+                AbsSymbolLast=AbsSymbolLast.slice(1,AbsSymbolLast.length-1);
+            }
+            
+            symbolArr.pop();/* delete last element after saving it first to last symbol */
+    
+            if(AbsSymbolLast.length<=MAX_DIGITS){/* last number(last digit pressed is included) has less than 6 digits else round it */
+                symbolNode.textContent+=digitNode.textContent.trim();
+            }
+            else{
+                symbolLast=symbolLast.slice(0,-1);/* removing digit that makes digit length>max digit length */
+                console.log(symbolLast);
+                symbolNode.textContent=symbolArr.join('')+symbolLast;
+            }
+
+        }
+        else{
+            symbolNode.textContent+=digitNode.textContent.trim();
+        }
+       
+
+        /*symbolNode.textContent+=digitNode.textContent.trim();*/
     }
     
 }
@@ -103,7 +132,8 @@ const DisplayOpHandler=(operatorNode)=>{
                 let subResult = calculations(calcArr);/*calculations result(number)*/
 
                 if(subResult!='Err'){/*Error after op button */
-                    symbolNode.textContent=subResult+operatorNode.textContent.trim();/**to appear to DOM!! */
+                    maxDigitValidate(symbolNode,subResult.toString());/* first round number if is to big then add op */
+                    symbolNode.textContent+=operatorNode.textContent.trim();/**to appear to DOM!! *///subResult+
 
                 }
                 else{
@@ -135,7 +165,11 @@ const resultHandler = ()=>{
         if(opNotAtEnd&&opIsIncl){//if op exists and is not at end of arr,means we have full equation
             let calcArray=generateSymbolArr(symbols);/* ['1','2','+','2','5'] -> [12,'+',25]*/ 
             let calcResult = calculations(calcArray);/*calculations result(number)*/ 
-            symbolNode.textContent=calcResult;
+            calcResult=calcResult.toString();
+            /* check if the result has many digits */
+            maxDigitValidate(symbolNode,calcResult);
+          
+                
         }
         else{
             symbolNode.textContent='Err';
@@ -205,7 +239,24 @@ function operate(num1,num2,op){
     return answer;
 
 }
-//&&(i!=0)
+function maxDigitValidate(node,resultText){
+    let digitAbsolute=resultText;
+    let checkNeg = false;
+    let pos =0;
+    if(resultText.charAt(0)=='-'){
+        digitAbsolute=digitAbsolute.slice(1,resultText.length-1);// store the absolute value if negative , in order to not count  sign 
+        checkNeg=true;                                          //as a digit in value's length 
+    }
+    if(digitAbsolute.length<MAX_DIGITS){
+        node.textContent=resultText;
+    }
+    else{
+        if(checkNeg){
+            pos=1;//if negative let count one more position in slice -> slice(0,max+1)==slice(range of [sign position + max_digits_length])
+        }
+        node.textContent=resultText.slice(0,MAX_DIGITS+pos);
+    }
+}
 function generateSymbolArr(array){
     let strNum = '';
     let newArr = [];
