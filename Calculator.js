@@ -1,15 +1,13 @@
 
 const OPERATORS = {'+':0,'-':1,'*':2,'/':3};
 const MAX_DIGITS = 5;
-let FIRST=true;//needed for floating in max digits
 
 const clearHandler = ()=>{
     let symbolNode = document.querySelector('h1');
-    FIRST=true;
     symbolNode.textContent='';
 }
+
 const backspaceHandler = ()=>{
-    FIRST=true;
     let symbolNode = document.querySelector('h1');
     let symbolContent=symbolNode.textContent;
     let symbolArr = symbolContent.split('');
@@ -24,18 +22,18 @@ const floatingHandler = (floatingPointContent)=>{
     let symbolNode = document.querySelector('h1');
     let symbolContent=symbolNode.textContent;
     
-    console.log(symbolContent.indexOf('.',1)!=-1);
     
+    /* if not screen empty and not err or start with '-' */
     if(symbolContent.length!=0&&symbolContent!='Err'&& symbolContent!='-'){
-       
-            const symbolOpSeparator =(symbolString)=>{/*splits string according to included operator(except '-' at start if given(negative))*/ 
+
+            /*INNER FUNC: splits string according to included operator(except '-' at start if given(negative))*/
+            const symbolOpSeparator =(symbolString)=>{ 
                 let opKeys = Object.keys(OPERATORS);
                 let splitStr =[];/** Init */
                 let opCondition;
                 let opIsIncl = false;
                 for(op of opKeys){
                     opCondition = op=='-'?1:0;
-    
                     switch(opCondition){
                         case 0:
                             if(symbolString.includes(op)){
@@ -60,37 +58,34 @@ const floatingHandler = (floatingPointContent)=>{
                 }
                 return splitStr;
             }
+            /*INNER FUNC:splits string according to included operator(except '-' at start if given(negative))*/
+
             let symbolArr = symbolOpSeparator(symbolContent);
-            console.log(`split for floating handler ${symbolArr}`);
-            if(symbolArr.length==0){/* operator is not included */
-               
+
+            /*If operator is  included->if not means we are at first number yet */
+            if(symbolArr.length==0){
                 if(!symbolContent.includes('.')){
                     symbolNode.textContent+=floatingPointContent.trim();
                 }
-                
             }
             else{
-                
+
                 let lastSymbol =symbolArr[symbolArr.length-1];
-                let isNotOp = lastSymbol!='+' && lastSymbol!='-' && lastSymbol!='*' && lastSymbol!='/';
-                if(isNotOp && !(lastSymbol.includes('.'))&& lastSymbol!=''){/*if last condition is true means we have an op at end */
+            
+                /* if last symbol not includes already floating point or last symbol is not op */
+                if(!(lastSymbol.includes('.'))&& lastSymbol!=''){
                     
     
                      symbolNode.textContent+=floatingPointContent.trim();
-                }
-    
-               
+                } 
+                /* if last symbol not includes already floating point or last symbol is not op */  
                 
             }
-
-       // }
-      
-        
+            /*If operator is  included */
     }
-
-
+    /* if not screen empty and not err or start with '-' */
 }
-/*error cases: +-,(+-* div at start)*/ 
+
 const DisplayDigitHandler=(digitNode)=>{
     let symbolNode = document.querySelector('h1');
     let symbolContent = symbolNode.textContent;
@@ -115,9 +110,8 @@ const DisplayDigitHandler=(digitNode)=>{
                 symbolNode.textContent+=digitNode.textContent.trim();
             }
             else{
-                if(symbolLast.includes('.')&&AbsSymbolLast.length==MAX_DIGITS+1){// Add digit if only max constraint is exceeded by 1 
-                //if(symbolLast.includes('.')){//&&FIRST){                       //due to floating point
-                    //FIRST=false;
+                if(symbolLast.includes('.')&&AbsSymbolLast.length==MAX_DIGITS+1){// Add digit if only max constraint is  exceeded by 1 
+                                                                                //due to floating point
                     symbolNode.textContent+=digitNode.textContent.trim();
                 } 
             }
@@ -135,19 +129,16 @@ const DisplayOpHandler=(operatorNode)=>{
     let symbolContent = symbolNode.textContent;
     let symbolArr=symbolContent.split('');//e.g ['1','2','+','2','.'...]
 
-    let opAtStart = symbolContent.length===0 && operatorNode.textContent.trim()!='-';
     let startWithNeg = symbolContent.length==0 && operatorNode.textContent.trim()=='-';
     let opAtEnd = symbolArr[symbolArr.length-1]=='+'||symbolArr[symbolArr.length-1]=='-'||symbolArr[symbolArr.length-1]=='*'
                     ||symbolArr[symbolArr.length-1]=='/';
     
-    //&&(!opAtStart)
     /*If Error or previous (symbol before currently op typed) is op do not insert to DOM*/
     if(symbolContent!='Err'&&(!opAtEnd)){
 
         /*If screen empty and  '-' is pressed for negative insert to DOM  */
         if(startWithNeg){
             symbolNode.textContent+=operatorNode.textContent.trim();        
-        
         }
         else{ //last symbol is digit,so if another op already exists , means we have already an equation
     
@@ -159,19 +150,15 @@ const DisplayOpHandler=(operatorNode)=>{
 
                 /*Division by zero case */
                 if(subResult!='Err'){
-                    //FIRST=true;
                     maxDigitValidate(symbolNode,subResult.toString().trim());//first round result if exceeds max digits  
                     symbolNode.textContent+=operatorNode.textContent.trim();//to appear to DOM!! 
-
                 }
                 else{
                     symbolNode.textContent=subResult;
-
                 }
                 /*Division by zero case */  
             }
             else{
-                //FIRST=true;
                 symbolNode.textContent+=operatorNode.textContent.trim();/**to appear to DOM!! */
             }
             /* Last symbol is digit,if other op already exists,we have already an equation*/
@@ -191,14 +178,16 @@ const resultHandler = ()=>{
     if(symbolNode.textContent!='Err'){
         
         let symbols = symbolNode.textContent.split('');/*'12+25'->['1','2','+','2','5']*/ 
-        let opNotAtEnd=symbols[symbols.length-1]!='+'&&symbols[symbols.length-1]!='-'&&symbols[symbols.length-1]!='*'&&symbols[symbols.length-1]!='/';
+        let opNotAtEnd=symbols[symbols.length-1]!='+'&&symbols[symbols.length-1]!='-'&&symbols[symbols.length-1]!='*'&&
+                        symbols[symbols.length-1]!='/';
         let opIsIncl = (symbols.includes('+'))||(symbols.includes('-',1))||(symbols.includes('*'))||(symbols.includes('/'));
-        if(opNotAtEnd&&opIsIncl){//if op exists and is not at end of arr,means we have full equation
+
+        /*if an op exists and is not the last symbol->calc full equation*/ 
+        if(opNotAtEnd&&opIsIncl){
             let calcArray=generateSymbolArr(symbols);/* ['1','2','+','2','5'] -> [12,'+',25]*/ 
-            let calcResult = calculations(calcArray);/*calculations result(number)*/ 
+            let calcResult = calculations(calcArray);
             calcResult=calcResult.toString().trim();
-            /* check if the result has many digits */
-            maxDigitValidate(symbolNode,calcResult);
+            maxDigitValidate(symbolNode,calcResult);//  check if the result has many digits 
           
                 
         }
@@ -206,6 +195,7 @@ const resultHandler = ()=>{
             symbolNode.textContent='Err';
 
         }
+        /*if an op exists and is not the last symbol->calc full equation*/
 
     }
     
@@ -273,7 +263,8 @@ function operate(num1,num2,op){
 function maxDigitValidate(node,resultText){
     let digitAbsolute=resultText;
     let checkNeg = false;
-    let pos =0;
+    let pos=0;
+    
     /* If result negative store abs value of result-> check only length of digits */
     if(resultText.charAt(0)=='-'){
         digitAbsolute=digitAbsolute.slice(1,resultText.length);// store the absolute value if negative , in order to not count  sign 
@@ -283,22 +274,41 @@ function maxDigitValidate(node,resultText){
     
     /* If result exceeds max digits */
     if(digitAbsolute.length<=MAX_DIGITS){
+
         node.textContent=resultText;
+
     }
     else{
 
-        let roundedResultText =resultText.slice(0,MAX_DIGITS-1);
-        /* If result has floating point */
-        if(roundedResultText.includes('.')){
-            roundedResultText=roundedResultText.slice(0,-1);// remove last .
+        /*Allocate extra positions for slicing if neg and floating or floating*/ 
+        if(checkNeg){
+            if(!resultText.includes('.')){
+                pos=1;
+            }
+            else{
+                pos=2;
+            }   
         }
-        /* If result has floating point */
+        else{
+            if(resultText.includes('.')){
+                pos=1;
+            }
+        }
+        /*Allocate extra poitions for slicing if neg and floating or floating*/ 
+
+        let roundedResultText =resultText.slice(0,MAX_DIGITS+pos);
+
+        /* If result has floating point of rounded result remove it */
+        if(roundedResultText.includes('.')&&roundedResultText.charAt('.')==roundedResultText.length){
+            roundedResultText=roundedResultText.slice(0,-1);
+        }
+        /* If result has floating point of rounded result remove it */
 
         node.textContent=roundedResultText;
     }
     /* If result exceeds max digits */
 }
-function generateSymbolArr(array){
+function generateSymbolArr(array){ // e.g.Input :['1','2','+','2','3','.','5']-> Output:[12,'+',23.5]
     let strNum = '';
     let newArr = [];
     for(let i=0;i<array.length;i++){
