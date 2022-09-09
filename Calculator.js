@@ -1,6 +1,6 @@
 
 const OPERATORS = {'+':0,'-':1,'*':2,'/':3};
-const MAX_DIGITS = 5;
+const MAX_DIGITS = 15;
 
 const clearHandler = ()=>{
     let symbolNode = document.querySelector('h1');
