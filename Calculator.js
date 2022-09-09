@@ -131,7 +131,7 @@ const DisplayOpHandler=(operatorNode)=>{
 
     let startWithNeg = symbolContent.length==0 && operatorNode.textContent.trim()=='-';
     let opAtEnd = symbolArr[symbolArr.length-1]=='+'||symbolArr[symbolArr.length-1]=='-'||symbolArr[symbolArr.length-1]=='*'
-                    ||symbolArr[symbolArr.length-1]=='/';
+                    ||symbolArr[symbolArr.length-1]=='/'||symbolArr[symbolArr.length-1]=='.';
     
     /*If Error or previous (symbol before currently op typed) is op do not insert to DOM*/
     if(symbolContent!='Err'&&(!opAtEnd)){
