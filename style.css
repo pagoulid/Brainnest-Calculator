@@ -1,3 +1,15 @@
+@font-face {
+    font-family: 'astradjingga';
+    src: url(fonts/astradjingga/Astradjingga\ Rough.ttf);
+}
+@font-face {
+    font-family: 'Obrazec';
+    src: url(fonts/Obrazec/Obrazec-2.ttf);
+}
+h1{
+    font-family: 'Obrazec',sans-serif;
+    
+}
 .calculator{
     width: 80%;
     height:55vh;
@@ -71,11 +83,12 @@
 
 .text-logo{
     display:inline-block;
-    font-style: italic;
+    font-family: 'astradjingga',sans-serif;
+    /*font-style: italic;*/
     
 }
 .img-logo{
-    margin-left: 2px;
+    margin-left: 1.5rem;
 }
 
 

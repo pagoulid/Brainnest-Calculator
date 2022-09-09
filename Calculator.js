@@ -1,13 +1,16 @@
 
 const OPERATORS = {'+':0,'-':1,'*':2,'/':3};
 const MAX_DIGITS = 5;
+let FIRST=true;//needed for floating in max digits
 
 const clearHandler = ()=>{
-    let symbolNode = document.querySelector('h3');
+    let symbolNode = document.querySelector('h1');
+    FIRST=true;
     symbolNode.textContent='';
 }
 const backspaceHandler = ()=>{
-    let symbolNode = document.querySelector('h3');
+    FIRST=true;
+    let symbolNode = document.querySelector('h1');
     let symbolContent=symbolNode.textContent;
     let symbolArr = symbolContent.split('');
     let symbolStr;
@@ -16,59 +19,72 @@ const backspaceHandler = ()=>{
     symbolNode.textContent=symbolStr;
 
 }
-const floatingHandler = (floatingPointContent)=>{
-    let symbolNode = document.querySelector('h3');
-    let symbolContent=symbolNode.textContent;
-    if(symbolContent.length!=0&&symbolContent!='Err'){
-        const symbolOpSeparator =(symbolString)=>{/*splits string according to included operator(except '-' at start if given(negative))*/ 
-            let opKeys = Object.keys(OPERATORS);
-            let splitStr =[];/** Init */
-            let opCondition;
-            let opIsIncl = false;
-            for(op of opKeys){
-                opCondition = op=='-'?1:0;
 
-                switch(opCondition){
-                    case 0:
-                        if(symbolString.includes(op)){
-                            opIsIncl=true;
-                            splitStr=symbolString.split(op);  
-                        }
+const floatingHandler = (floatingPointContent)=>{
+    let symbolNode = document.querySelector('h1');
+    let symbolContent=symbolNode.textContent;
+    
+    console.log(symbolContent.indexOf('.',1)!=-1);
+    
+    if(symbolContent.length!=0&&symbolContent!='Err'&& symbolContent!='-'){
+       
+            const symbolOpSeparator =(symbolString)=>{/*splits string according to included operator(except '-' at start if given(negative))*/ 
+                let opKeys = Object.keys(OPERATORS);
+                let splitStr =[];/** Init */
+                let opCondition;
+                let opIsIncl = false;
+                for(op of opKeys){
+                    opCondition = op=='-'?1:0;
+    
+                    switch(opCondition){
+                        case 0:
+                            if(symbolString.includes(op)){
+                                opIsIncl=true;
+                                splitStr=symbolString.split(op);  
+                            }
+                            break;
+                        case 1:
+                            if(symbolString.includes(op,1)){
+                                opIsIncl=true;
+                                splitStr=symbolString.split(op);  
+                            }
+                            break;
+                        
+                    }
+    
+                    /* if split is done break from loop */
+                    if(opIsIncl){
                         break;
-                    case 1:
-                        if(symbolString.includes(op,1)){
-                            opIsIncl=true;
-                            splitStr=symbolString.split(op);  
-                        }
-                        break;
+                    }
                     
                 }
-
-                /* if split is done break from loop */
-                if(opIsIncl){
-                    break;
+                return splitStr;
+            }
+            let symbolArr = symbolOpSeparator(symbolContent);
+            console.log(`split for floating handler ${symbolArr}`);
+            if(symbolArr.length==0){/* operator is not included */
+               
+                if(!symbolContent.includes('.')){
+                    symbolNode.textContent+=floatingPointContent.trim();
                 }
                 
             }
-            return splitStr;
-        }
-        let symbolArr = symbolOpSeparator(symbolContent);
-        console.log(`split for floating handler ${symbolArr}`);
-        if(symbolArr.length==0){/* operator is not included */
-            symbolNode.textContent+=floatingPointContent.trim();
-        }
-        else{
-           
-            let lastSymbol =symbolArr[symbolArr.length-1];
-            let isNotOp = lastSymbol!='+' && lastSymbol!='-' && lastSymbol!='*' && lastSymbol!='/';
-            if(isNotOp && !(lastSymbol.includes('.'))&& lastSymbol!=''){/*if last condition is true means we have an op at end */
- 
-                 symbolNode.textContent+=floatingPointContent.trim();
+            else{
+                
+                let lastSymbol =symbolArr[symbolArr.length-1];
+                let isNotOp = lastSymbol!='+' && lastSymbol!='-' && lastSymbol!='*' && lastSymbol!='/';
+                if(isNotOp && !(lastSymbol.includes('.'))&& lastSymbol!=''){/*if last condition is true means we have an op at end */
+                    
+    
+                     symbolNode.textContent+=floatingPointContent.trim();
+                }
+    
+               
+                
             }
 
-           
-            
-        }
+       // }
+      
         
     }
 
@@ -76,96 +92,111 @@ const floatingHandler = (floatingPointContent)=>{
 }
 /*error cases: +-,(+-* div at start)*/ 
 const DisplayDigitHandler=(digitNode)=>{
-    let symbolNode = document.querySelector('h3');
+    let symbolNode = document.querySelector('h1');
     let symbolContent = symbolNode.textContent;
-    if(symbolContent!='Err'){
-        if(symbolContent.length!=0){
+
+    if(symbolContent!='Err'){// from previous possible operations
+        if(symbolContent.length!=0){// screen is not empty
+
             let symbolStr = symbolContent+digitNode.textContent.trim();
-            let symbolArr = generateSymbolArr(symbolStr);
+            let symbolArr = generateSymbolArr(symbolStr);//e.g.'12+86'->[12,'+',86] , 6 is digit we already typed
             
-            let symbolLast = symbolArr[symbolArr.length-1].toString();/* convert to string to check length for big number */
+            let symbolLast = symbolArr[symbolArr.length-1].toString();/* convert last number to string to check length for big number */
+                                                                      /*Want to check last -> currently typing digits of this number*/ 
+            /* Keep absolute value if negative */
             let AbsSymbolLast = symbolLast;
-            if(AbsSymbolLast.charAt(0)=='-'){// to validate properly in case of negative number
-                AbsSymbolLast=AbsSymbolLast.slice(1,AbsSymbolLast.length-1);
+            if(AbsSymbolLast.charAt(0)=='-'){
+                AbsSymbolLast=AbsSymbolLast.slice(1,AbsSymbolLast.length);
             }
-            
-            symbolArr.pop();/* delete last element after saving it first to last symbol */
-    
-            if(AbsSymbolLast.length<=MAX_DIGITS){/* last number(last digit pressed is included) has less than 6 digits else round it */
+            /* Keep absolute value if negative */
+
+            /* last number(last digit pressed is included) has less than 6 digits else round it */
+            if(AbsSymbolLast.length<=MAX_DIGITS){               
                 symbolNode.textContent+=digitNode.textContent.trim();
             }
             else{
-                symbolLast=symbolLast.slice(0,-1);/* removing digit that makes digit length>max digit length */
-                console.log(symbolLast);
-                symbolNode.textContent=symbolArr.join('')+symbolLast;
+                if(symbolLast.includes('.')&&AbsSymbolLast.length==MAX_DIGITS+1){// Add digit if only max constraint is exceeded by 1 
+                //if(symbolLast.includes('.')){//&&FIRST){                       //due to floating point
+                    //FIRST=false;
+                    symbolNode.textContent+=digitNode.textContent.trim();
+                } 
             }
+            /* last number(last digit pressed is included) has less than 6 digits else round it */
 
         }
-        else{
+        else{// if empty screen
             symbolNode.textContent+=digitNode.textContent.trim();
         }
-       
-
-        /*symbolNode.textContent+=digitNode.textContent.trim();*/
     }
     
 }
 const DisplayOpHandler=(operatorNode)=>{
-    let symbolNode = document.querySelector('h3');
+    let symbolNode = document.querySelector('h1');
     let symbolContent = symbolNode.textContent;
-    let symbolArr=symbolContent.split('');
+    let symbolArr=symbolContent.split('');//e.g ['1','2','+','2','.'...]
+
     let opAtStart = symbolContent.length===0 && operatorNode.textContent.trim()!='-';
-    let opAtEnd = symbolArr[symbolArr.length-1]=='+'||symbolArr[symbolArr.length-1]=='-'||symbolArr[symbolArr.length-1]=='*'||symbolArr[symbolArr.length-1]=='/';
-    //let opAtEnd = symbolContent.split('')
- 
-    if(symbolContent!='Err'&&(!opAtStart)&&(!opAtEnd)){//Error after equals button
-        if(symbolContent.length==0 && operatorNode.textContent.trim()=='-'){/*Check if first symbol is - for negative number*/ 
-        symbolNode.textContent+=operatorNode.textContent.trim();/**to appear to DOM!! */
+    let startWithNeg = symbolContent.length==0 && operatorNode.textContent.trim()=='-';
+    let opAtEnd = symbolArr[symbolArr.length-1]=='+'||symbolArr[symbolArr.length-1]=='-'||symbolArr[symbolArr.length-1]=='*'
+                    ||symbolArr[symbolArr.length-1]=='/';
+    
+    //&&(!opAtStart)
+    /*If Error or previous (symbol before currently op typed) is op do not insert to DOM*/
+    if(symbolContent!='Err'&&(!opAtEnd)){
+
+        /*If screen empty and  '-' is pressed for negative insert to DOM  */
+        if(startWithNeg){
+            symbolNode.textContent+=operatorNode.textContent.trim();        
         
         }
-        else{
-            /*Checks current h3 string when an op is pressed */
-            /* If another op already exists , means we have already an equation */
-            /* Calc the result of the eq above and put to DOM the result with the current operator that was pressed  */
+        else{ //last symbol is digit,so if another op already exists , means we have already an equation
+    
+            /* Last symbol is digit,if other op already exists,we have already an equation*/
+            /* Do calculation and put to DOM with curr pressed operator else just add the pressed op */
             if(symbolContent.includes('+')||symbolContent.includes('-',1)||symbolContent.includes('*')||symbolContent.includes('/')){
                 let calcArr = generateSymbolArr(symbolArr);/* ['1','2','+','2','5'] -> [12,'+',25]*/
-                let subResult = calculations(calcArr);/*calculations result(number)*/
+                let subResult = calculations(calcArr);
 
-                if(subResult!='Err'){/*Error after op button */
-                    maxDigitValidate(symbolNode,subResult.toString());/* first round number if is to big then add op */
-                    symbolNode.textContent+=operatorNode.textContent.trim();/**to appear to DOM!! *///subResult+
+                /*Division by zero case */
+                if(subResult!='Err'){
+                    //FIRST=true;
+                    maxDigitValidate(symbolNode,subResult.toString().trim());//first round result if exceeds max digits  
+                    symbolNode.textContent+=operatorNode.textContent.trim();//to appear to DOM!! 
 
                 }
                 else{
                     symbolNode.textContent=subResult;
 
                 }
-                
+                /*Division by zero case */  
             }
             else{
-            
+                //FIRST=true;
                 symbolNode.textContent+=operatorNode.textContent.trim();/**to appear to DOM!! */
-            
             }
+            /* Last symbol is digit,if other op already exists,we have already an equation*/
+            /* Do calculation and put to DOM with curr pressed operator else just add the pressed op */
         }
+        /*If screen empty and  '-' is pressed for negative insert to DOM */
 
     }
-    
+   /*If Error or previous (symbol before currently op typed) is op do not insert to DOM*/ 
     
 }
 const resultHandler = ()=>{
     
     
-    let symbolNode = document.querySelector('h3');
-
+    let symbolNode = document.querySelector('h1');
+    
     if(symbolNode.textContent!='Err'){
+        
         let symbols = symbolNode.textContent.split('');/*'12+25'->['1','2','+','2','5']*/ 
         let opNotAtEnd=symbols[symbols.length-1]!='+'&&symbols[symbols.length-1]!='-'&&symbols[symbols.length-1]!='*'&&symbols[symbols.length-1]!='/';
         let opIsIncl = (symbols.includes('+'))||(symbols.includes('-',1))||(symbols.includes('*'))||(symbols.includes('/'));
         if(opNotAtEnd&&opIsIncl){//if op exists and is not at end of arr,means we have full equation
             let calcArray=generateSymbolArr(symbols);/* ['1','2','+','2','5'] -> [12,'+',25]*/ 
             let calcResult = calculations(calcArray);/*calculations result(number)*/ 
-            calcResult=calcResult.toString();
+            calcResult=calcResult.toString().trim();
             /* check if the result has many digits */
             maxDigitValidate(symbolNode,calcResult);
           
@@ -214,7 +245,7 @@ function divide(num1,num2){
         if(num1%num2==0){/*if decimal */
         return res;
         }
-        return (res).toPrecision(3);
+        return (res).toPrecision(MAX_DIGITS);
 
     }
     return 'Err';
@@ -243,19 +274,29 @@ function maxDigitValidate(node,resultText){
     let digitAbsolute=resultText;
     let checkNeg = false;
     let pos =0;
+    /* If result negative store abs value of result-> check only length of digits */
     if(resultText.charAt(0)=='-'){
-        digitAbsolute=digitAbsolute.slice(1,resultText.length-1);// store the absolute value if negative , in order to not count  sign 
+        digitAbsolute=digitAbsolute.slice(1,resultText.length);// store the absolute value if negative , in order to not count  sign 
         checkNeg=true;                                          //as a digit in value's length 
     }
-    if(digitAbsolute.length<MAX_DIGITS){
+    /* If result negative store abs value of result-> check only length of digits */
+    
+    /* If result exceeds max digits */
+    if(digitAbsolute.length<=MAX_DIGITS){
         node.textContent=resultText;
     }
     else{
-        if(checkNeg){
-            pos=1;//if negative let count one more position in slice -> slice(0,max+1)==slice(range of [sign position + max_digits_length])
+
+        let roundedResultText =resultText.slice(0,MAX_DIGITS-1);
+        /* If result has floating point */
+        if(roundedResultText.includes('.')){
+            roundedResultText=roundedResultText.slice(0,-1);// remove last .
         }
-        node.textContent=resultText.slice(0,MAX_DIGITS+pos);
+        /* If result has floating point */
+
+        node.textContent=roundedResultText;
     }
+    /* If result exceeds max digits */
 }
 function generateSymbolArr(array){
     let strNum = '';
