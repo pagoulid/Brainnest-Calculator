@@ -94,7 +94,7 @@ const DisplayDigitHandler=(digitNode)=>{
         if(symbolContent.length!=0){// screen is not empty
 
             let symbolStr = symbolContent+digitNode.textContent.trim();
-            let symbolArr = generateSymbolArr(symbolStr);//e.g.'12+86'->[12,'+',86] , 6 is digit we already typed
+            let symbolArr = generateSymbolArr(symbolStr.split(''));//e.g.'12+86'->[12,'+',86] , 6 is digit we already typed
             
             let symbolLast = symbolArr[symbolArr.length-1].toString();/* convert last number to string to check length for big number */
                                                                       /*Want to check last -> currently typing digits of this number*/ 
