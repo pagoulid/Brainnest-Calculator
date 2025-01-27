@@ -59,8 +59,8 @@ h1{
 .position-block{
     display:inline-block;
     position:relative;
-    top:-32.3rem;
-    left:25rem;
+    top:-31.7rem;
+    left:14.1rem;
 }
 .digit-block div{
     flex-grow: 0.1;
@@ -71,6 +71,7 @@ h1{
 .operator-block div{
     flex:0.5 1 2rem;
     border: 1px solid black;
+    height:99px;
 
 }
 .digit-block div{
